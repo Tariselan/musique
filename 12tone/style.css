@@ -1,0 +1,5 @@
+body > div{
+    width: 100%;
+    display: flex;
+    justify-items: center;
+}
