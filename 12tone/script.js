@@ -1,59 +1,50 @@
-// Ensure the DOM content is loaded before accessing elements
-document.addEventListener("DOMContentLoaded", function() {
-    // Create a VexFlow Renderer
-    var VF = Vex.Flow;
-    var div = document.querySelectorAll(".sheet-music").forEach(div => {
-        if (div) {
-        var renderer = new VF.Renderer(div, VF.Renderer.Backends.SVG);
+function generateBar(notes) {
+    const VF = Vex.Flow;
 
-        // Configure the Renderer
-        renderer.resize(400, 200);
-        var context = renderer.getContext();
+    // Create a renderer
+    const div = document.createElement("div");
+    document.body.appendChild(div);
+    const renderer = new VF.Renderer(div, VF.Renderer.Backends.SVG);
+    renderer.resize(400, 200);
+    const context = renderer.getContext();
 
-        // Create a new Stave
-        var stave = new VF.Stave(10, 40, 400);
+    // Create a stave
+    const stave = new VF.Stave(10, 40, 400);
+    stave.setContext(context).draw();
 
-        // Add a Treble Clef
-        stave.addClef("treble");
+    // Draw barlines
+    stave.setBegBarType(VF.Barline.type.SINGLE); // Add barline at the beginning
+    stave.setEndBarType(VF.Barline.type.SINGLE); // Add barline at the end
 
-        // Add time signature
-        stave.addTimeSignature("4/4");
+    // Create notes based on the input
+    const vfNotes = notes.map(note => {
+        const noteNames = ["c", "c#", "d", "d#", "e", "f", "f#", "g", "g#", "a", "a#", "b"];
+        const noteName = noteNames[note % 12]; // Getting the note name from the note value
+        const accidental = note % 12 !== 1 && note % 12 !== 3 && note % 12 !== 6 && note % 12 !== 8 && note % 12 !== 10 ? "b" : "#";
+        return new VF.StaveNote({
+            keys: [`${noteName}/${4}`], // Including accidental in the key
+            duration: "q", // Quarter note duration
+            style: { fillStyle: "black" }, // Filled notehead without stem
+            clef: "treble", // Adding clef
+            accidental: accidental // Setting the accidental type
+        }).addModifier(0, new VF.Annotation(note)); // Adding annotation (optional)
+    });
 
-        // Connect the Stave to the rendering context
-        stave.setContext(context).draw();
+    // Create a voice
+    const voice = new VF.Voice({ num_beats: notes.length, beat_value: 4 }); // Assuming 4/4 time signature
+    voice.addTickables(vfNotes);
 
-        // Create some notes
-        var notes = [
-            new VF.StaveNote({ keys: ["c/4"], duration: "w" }),
-        ];
+    // Format and justify the notes to fit within the stave
+    new VF.Formatter().joinVoices([voice]).format([voice], 300);
 
-        // Create a Voice
-        var voice = new VF.Voice({ num_beats: 4, beat_value: 4 });
-        voice.addTickables(notes);
+    // Render the notes
+    voice.draw(context, stave);
 
-        // Format and justify the notes to fit within the Stave
-        var formatter = new VF.Formatter().joinVoices([voice]).format([voice], 300);
+    // Remove stems from the notes
+    vfNotes.forEach(note => {
+        note.setStemStyle({ visible: false });
+    });
+}
 
-        // Render the notes
-        voice.draw(context, stave);
-        // Create a div for the barline
-        var barlineDiv = document.createElement("div");
-        barlineDiv.classList.add("barline");
-        document.body.appendChild(barlineDiv);
-
-        // Position the barline div at the end of the staff
-        var staveRect = stave.getBoundingBox();
-        var barlineX = staveRect.x + staveRect.width;
-
-        // Set the position and dimensions of the barline div
-        barlineDiv.style.left = barlineX + "px";
-        barlineDiv.style.top = staveRect.y + "px";
-        barlineDiv.style.height = staveRect.height + "px";
-    } else {
-        console.error("Div with id 'sheet-music' not found.");
-    }
-});
-    
-
-    
-});
+// Example usage:
+generateBar([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]);

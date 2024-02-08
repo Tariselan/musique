@@ -1,5 +1,29 @@
-body > div{
-    width: 100%;
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #faf2e4;
+}
+
+.sheet-music-container {
     display: flex;
-    justify-items: center;
+    flex-wrap: wrap;
+    justify-content: center; /* Center content horizontally */
+    align-items: center; /* Center content vertically */
+    margin-top: 20px;
+}
+
+.sheet-music {
+    width: calc(50% - 40px);
+    margin: 10px;
+    display: flex;
+    justify-content: center; /* Center content horizontally within each sheet-music div */
+    background-color: #f7e6c8;
+    border: solid 8px #f8e3c0;
+    border-radius: 5px;
+}
+
+.barline {
+    position: absolute;
+    background-color: black;
+    width: 2px;
 }
